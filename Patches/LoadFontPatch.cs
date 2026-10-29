@@ -1,4 +1,3 @@
-using System.IO;
 using HarmonyLib;
 using OmaNekoSeikatsuPlugin;
 using UnityEngine;
@@ -9,7 +8,7 @@ using UnityEngine;
 )]
 class LoadFontPatch {
     static bool Prefix(object __instance, ref object __result) {
-        var fontName = "BoutiqueBitmap9x9_1.93";
+        var fontName = "BoutiqueBitmap-9px";
         var font = LoadBundleFont(fontName);
         if (font != null)
         {
@@ -25,7 +24,7 @@ class LoadFontPatch {
         var lang = GameLocalization.CurrentLanguage;
         if (lang != GameLanguage.Chinese)
         {
-            return Plugin.BestTenDOT;
+            return Plugin.BestTenDot;
         }
         Debug.Log($"加载系统字体 {name}");
         var font = Font.CreateDynamicFontFromOSFont(name, 16);
@@ -34,20 +33,11 @@ class LoadFontPatch {
 
     static Font LoadBundleFont(string name)
     {
-        var bundleName = "pixelfonts.bundle";
-        var path = Path.Combine(Plugin.PluginDir, bundleName);
-        if (!File.Exists(path))
+        AssetBundle bundle = Plugin.PixelFontsBundle;
+        if (bundle == null)
         {
-            Debug.LogWarning($"找不到像素字体包 {path}");
+            Debug.LogWarning("像素字体资源包打开失败");
             return null;
-        }
-
-        AssetBundle bundle = AssetBundle.LoadFromFile(path);
-        var assetNames = bundle.GetAllAssetNames();
-        Debug.Log($"从 AssetBundle 中加载资源 {assetNames.Length} 个");
-        foreach (var assetName in assetNames)
-        {
-            Debug.Log($"加载AssetBundle资源 {assetName}");
         }
 
         var font = bundle.LoadAsset<Font>(name);

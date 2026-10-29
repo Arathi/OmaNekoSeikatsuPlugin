@@ -1,7 +1,6 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
-using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using System.Reflection;
@@ -16,24 +15,8 @@ namespace OmaNekoSeikatsuPlugin;
 public class Plugin : BaseUnityPlugin
 {
     internal static new ManualLogSource Logger;
-
-    private static Dictionary<string, Font> fonts = new Dictionary<string, Font>();
-
-    public static Font BestTenDOT
-    {
-        get {
-            var font = fonts["BestTen-DOT"];
-            return font;
-        }
-    }
-
-    public static Font NotoSans
-    {
-        get {
-            var font = fonts["InventoryNotoSansSC-Regular"];
-            return font;
-        }
-    }
+    public static Font BestTenDot;
+    public static AssetBundle PixelFontsBundle;
 
     public static string PluginDir
     {
@@ -52,17 +35,36 @@ public class Plugin : BaseUnityPlugin
         var fontList = Resources.LoadAll<Font>("");
         Debug.Log($"找到 {fontList.Length} 个 Font 资源");
         foreach (var font in fontList) {
-            fonts[font.name] = font;
-            Debug.Log($"字体 {font.name} ({font.fontSize}px) 已加载");
+            Debug.Log($"内部字体 {font.name} ({font.fontSize}px) 已加载");
+            switch (font.name)
+            {
+                case "BestTen-DOT":
+                    BestTenDot = font;
+                    break;
+            }
         }
 
-        var fontNameList = Font.GetOSInstalledFontNames();
-        Debug.Log($"找到 {fontNameList.Length} 个系统字体");
-        foreach (var font in fontNameList) {
-            Debug.Log($"系统字体 {font} 已安装");
-        }
+        LoadPixelFontsBundle();
 
         var harmony = new Harmony("com.undsf.omanekoseikatsu");
         harmony.PatchAll();
+    }
+
+    private void LoadPixelFontsBundle()
+    {
+        var path = Path.Combine(PluginDir, "pixelfonts.bundle");
+        if (!File.Exists(path))
+        {
+            Debug.LogWarning($"找不到像素字体包 {path}");
+            return;
+        }
+
+        var bundle = AssetBundle.LoadFromFile(path);
+        var fonts = bundle.LoadAllAssets<Font>();
+        foreach (var font in fonts)
+        {
+            Debug.Log($"外部字体 {font.name}");
+        }
+        PixelFontsBundle = bundle;
     }
 }
