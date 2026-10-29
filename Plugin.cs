@@ -2,7 +2,9 @@
 using BepInEx.Logging;
 using HarmonyLib;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
+using System.Reflection;
 
 namespace OmaNekoSeikatsuPlugin;
 
@@ -17,17 +19,28 @@ public class Plugin : BaseUnityPlugin
 
     private static Dictionary<string, Font> fonts = new Dictionary<string, Font>();
 
-    public static Font BestTenDOT {
+    public static Font BestTenDOT
+    {
         get {
             var font = fonts["BestTen-DOT"];
             return font;
         }
     }
 
-    public static Font NotoSans {
+    public static Font NotoSans
+    {
         get {
             var font = fonts["InventoryNotoSansSC-Regular"];
             return font;
+        }
+    }
+
+    public static string PluginDir
+    {
+        get {
+            var dll = Assembly.GetExecutingAssembly().Location;
+            var dir = Path.GetDirectoryName(dll);
+            return dir;
         }
     }
 

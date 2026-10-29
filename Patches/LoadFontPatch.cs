@@ -1,5 +1,4 @@
 using System.IO;
-using BepInEx;
 using HarmonyLib;
 using OmaNekoSeikatsuPlugin;
 using UnityEngine;
@@ -10,43 +9,48 @@ using UnityEngine;
 )]
 class LoadFontPatch {
     static bool Prefix(object __instance, ref object __result) {
-        // var traverse = Traverse.Create(__instance);
-        var font = LoadFont("BoutiqueBitmap9x9");
+        var fontName = "BoutiqueBitmap9x9_1.93";
+        var font = LoadBundleFont(fontName);
         if (font != null)
         {
             __result = font;
             return false;
         }
+        Debug.LogWarning($"字体加载失败：{fontName}");
         return true;
     }
 
-    static Font LoadFont(string name)
+    static Font LoadOsFont(string name)
     {
         var lang = GameLocalization.CurrentLanguage;
         if (lang != GameLanguage.Chinese)
         {
             return Plugin.BestTenDOT;
         }
-
-        // var path = Path.Combine(Paths.PluginPath, "Fonts", name);
         Debug.Log($"加载系统字体 {name}");
-        // var font = new Font([path], 16);
         var font = Font.CreateDynamicFontFromOSFont(name, 16);
-        // font.material = Plugin.BestTenDOT.material;
         return font;
     }
-}
 
-[HarmonyPatch(
-    typeof(BestTenDotUIFontApplier),
-    "HandleLanguageChanged"
-)]
-class HandleLanguageChangedPatch {
-    static bool Prefix(object __instance) {
-        var traverse = Traverse.Create(__instance);
-        var lang = GameLocalization.CurrentLanguage;
-        Debug.Log($"语言发生变化 {lang}");
-        traverse.Field("_font").SetValue(null);
-        return true;
+    static Font LoadBundleFont(string name)
+    {
+        var bundleName = "pixelfonts.bundle";
+        var path = Path.Combine(Plugin.PluginDir, bundleName);
+        if (!File.Exists(path))
+        {
+            Debug.LogWarning($"找不到像素字体包 {path}");
+            return null;
+        }
+
+        AssetBundle bundle = AssetBundle.LoadFromFile(path);
+        var assetNames = bundle.GetAllAssetNames();
+        Debug.Log($"从 AssetBundle 中加载资源 {assetNames.Length} 个");
+        foreach (var assetName in assetNames)
+        {
+            Debug.Log($"加载AssetBundle资源 {assetName}");
+        }
+
+        var font = bundle.LoadAsset<Font>(name);
+        return font;
     }
 }

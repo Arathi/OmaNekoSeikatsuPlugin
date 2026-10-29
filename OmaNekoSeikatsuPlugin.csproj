@@ -3,7 +3,7 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <AssemblyName>OmaNekoSeikatsuPlugin</AssemblyName>
     <Product>OmaNeko-Seikatsu Plugin</Product>
-    <BaseVersion>0.2.0</BaseVersion>
+    <BaseVersion>0.3.0</BaseVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <RestoreAdditionalProjectSources>
@@ -16,6 +16,7 @@
     <GameName>OmaNeko-Seikatsu</GameName>
     <GameDataDir>$(GameDir)\$(GameName)_Data</GameDataDir>
     <BepInExDir>$(GameDir)\BepInEx</BepInExDir>
+    <PluginDir>$(BepInExDir)\plugins\$(AssemblyName)</PluginDir>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
@@ -57,6 +58,6 @@
 
   <Target Name="CopyToPlugins" AfterTargets="Build">
     <Message Text="正在复制到插件目录 ..." Importance="High" />
-    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(BepInExDir)\plugins" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(PluginDir)" />
   </Target>
 </Project>
