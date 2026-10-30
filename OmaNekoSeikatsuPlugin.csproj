@@ -3,7 +3,7 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <AssemblyName>OmaNekoSeikatsuPlugin</AssemblyName>
     <Product>OmaNeko-Seikatsu Plugin</Product>
-    <BaseVersion>0.4.0</BaseVersion>
+    <BaseVersion>0.5.0</BaseVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <RestoreAdditionalProjectSources>

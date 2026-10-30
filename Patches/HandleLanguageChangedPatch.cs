@@ -6,7 +6,7 @@ using UnityEngine;
     typeof(BestTenDotUIFontApplier),
     "HandleLanguageChanged"
 )]
-class HandleLanguageChangedPatch {
+public class HandleLanguageChangedPatch {
     static bool Prefix(object __instance) {
         var traverse = Traverse.Create(__instance);
         var lang = GameLocalization.CurrentLanguage;

@@ -1,9 +1,9 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
-using System.IO;
 using UnityEngine;
-using System.Reflection;
+using BepInEx.Configuration;
+using System;
 
 namespace OmaNekoSeikatsuPlugin;
 
@@ -14,57 +14,75 @@ namespace OmaNekoSeikatsuPlugin;
 )]
 public class Plugin : BaseUnityPlugin
 {
-    internal static new ManualLogSource Logger;
-    public static Font BestTenDot;
-    public static AssetBundle PixelFontsBundle;
+    public static Plugin Instance { get; private set; }
 
-    public static string PluginDir
-    {
-        get {
-            var dll = Assembly.GetExecutingAssembly().Location;
-            var dir = Path.GetDirectoryName(dll);
-            return dir;
-        }
-    }
+    internal static new ManualLogSource Logger;
+
+    public ConfigEntry<string> Japanese { get; private set; }
+
+    public ConfigEntry<string> English { get; private set; }
+
+    public ConfigEntry<string> Chinese { get; private set; }
 
     private void Awake()
     {
+        Instance = this;
         Logger = base.Logger;
         Debug.Log($"插件 OmaNeko-Seikatsu Plugin 加载完成！");
 
-        var fontList = Resources.LoadAll<Font>("");
-        Debug.Log($"找到 {fontList.Length} 个 Font 资源");
-        foreach (var font in fontList) {
-            Debug.Log($"内部字体 {font.name} ({font.fontSize}px) 已加载");
-            switch (font.name)
-            {
-                case "BestTen-DOT":
-                    BestTenDot = font;
-                    break;
-            }
-        }
-
-        LoadPixelFontsBundle();
+        FontManager.Initialize();
+        var fontNames = FontManager.Instance.FontNames;
+        InitializeConfigEntries(fontNames);
 
         var harmony = new Harmony("com.undsf.omanekoseikatsu");
         harmony.PatchAll();
     }
 
-    private void LoadPixelFontsBundle()
+    private void InitializeConfigEntries(string[] fontNames)
     {
-        var path = Path.Combine(PluginDir, "pixelfonts.bundle");
-        if (!File.Exists(path))
-        {
-            Debug.LogWarning($"找不到像素字体包 {path}");
-            return;
-        }
+        var acceptableValueList = new AcceptableValueList<string>(fontNames);
 
-        var bundle = AssetBundle.LoadFromFile(path);
-        var fonts = bundle.LoadAllAssets<Font>();
-        foreach (var font in fonts)
-        {
-            Debug.Log($"外部字体 {font.name}");
-        }
-        PixelFontsBundle = bundle;
+        Japanese = Config.Bind(
+            "Fonts",
+            "Japanese",
+            "BestTen-DOT",
+            new ConfigDescription(
+                "选择日文字体",
+                acceptableValueList
+            )
+        );
+        Japanese.SettingChanged += OnFontChanged;
+
+        English = Config.Bind(
+            "Fonts",
+            "English",
+            "BestTen-DOT",
+            new ConfigDescription(
+                "选择英文字体",
+                acceptableValueList
+            )
+        );
+        English.SettingChanged += OnFontChanged;
+        
+        Chinese = Config.Bind(
+            "Fonts",
+            "Chinese",
+            "BestTen-DOT",
+            new ConfigDescription(
+                "选择中文字体",
+                acceptableValueList
+            )
+        );
+        Chinese.SettingChanged += OnFontChanged;
+    }
+
+    private void OnFontChanged(object sender, EventArgs e)
+    {
+        var traverse = Traverse.Create(typeof(BestTenDotUIFontApplier));
+        Debug.Log($"字体发生变化");
+        traverse
+            .Field("_instance")
+            .Field("_font")
+            .SetValue(null);
     }
 }
