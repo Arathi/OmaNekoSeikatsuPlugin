@@ -3,4 +3,4 @@ obj/
 
 .vscode/settings.json
 *.csproj.user
-local.props
+Directory.Build.props

@@ -56,8 +56,12 @@
     </Reference>
   </ItemGroup>
 
+  <Target Name="CheckProperties" BeforeTargets="Build">
+    <Message Text="PluginDir = $(PluginDir)" Importance="high" />
+  </Target>
+
   <Target Name="CopyToPlugins" AfterTargets="Build">
-    <Message Text="正在复制到插件目录 ..." Importance="High" />
+    <Message Text="正在复制到插件目录 ..." Importance="high" />
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(PluginDir)" />
   </Target>
 </Project>
